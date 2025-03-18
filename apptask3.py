@@ -19,7 +19,7 @@ st.set_page_config(
 # Loading my  data
 @st.cache_data
 def load_data():
-    # Load my CSV files
+    # Loading my CSV files
     merged_df = pd.read_csv("merged.csv")
     summary_df = pd.read_csv("summary.csv")
     
@@ -32,7 +32,7 @@ def load_data():
         4: "Value-Oriented Stable Assets"
     }
     
-    # Adding cluster names to dataframe
+    # Adding the cluster names to dataframe
     merged_df['Cluster_Name'] = merged_df['Cluster'].map(cluster_names)
     
     return merged_df, summary_df
@@ -40,15 +40,8 @@ def load_data():
 
 def generate_ai_insights(data):
     """Generate insights using Gemini API based on filtered dashboard data"""
-    try:
-        # First try Streamlit secrets which i have (for deployment)
-        api_key = st.secrets["GEMINI_API_KEY"]
-    except:
-        try:
-            load_dotenv()
-            api_key = os.getenv("GEMINI_API_KEY")
-        except:
-            return "‼️ Gemini API key not found. Please set up your API key to enable AI insights."
+        # Streamlit secrets management used which I have (for deployment), to hide my Gemini API Key
+    api_key = st.secrets["GEMINI_API_KEY"]
     
     if not api_key:
         return "‼️ Gemini API key not found. Please set up your API key to enable AI insights."
@@ -61,7 +54,7 @@ def generate_ai_insights(data):
     prompt = f"""
     You are a real estate analytics expert analyzing rental property data. 
     Based on the following filtered dataset, provide 3-5 key insights that would be valuable for investors or property managers. 
-    Explain any real estate terms in plain language and fun language
+    Explain any real estate terms that may be complex. Answer in plain and fun language.
     
     Data Summary:
     - Total Properties: {data['total_properties']}
@@ -83,6 +76,7 @@ def generate_ai_insights(data):
     2. Compare performance across different clusters and markets
     3. Highlight any anomalies or outliers worth investigating
     4. Consider how property age relates to performance metrics
+    5. Include explanation of relevant real estate terms that may be difficult for entry level analyst or a common man.
 
     Format your response as:
     - Clear bullet points with concise insights
@@ -173,8 +167,8 @@ def main():
     # Map Section
     st.header("Geographic Distribution")
     
-    # Create map with property locations - map makes it attractive
-    fig = px.scatter_mapbox(
+    # Create map with property locations - map makes it attractive and with hover properties
+    fig = px.scatter_map(
         filtered_df,
         lat="Latitude",
         lon="Longitude",
@@ -209,7 +203,7 @@ def main():
     with tab1:
         st.subheader("Average Effective Rent vs. Occupancy")
         
-        # Create scatter plot
+        # Creating scatter plot
         fig = px.scatter(
             filtered_df,
             x="Avg_Effective_Rent",
@@ -248,7 +242,7 @@ def main():
         metric_options = {
             "Avg_Effective_Rent_Per_SqFt": "Effective Rent Per SqFt ($)",
             "Property_Age": "Property Age (Years)",
-            "Avg_Concession": "Average Concession (Days)",
+            "Avg_Concession": "Average Concession ($)",
             "Lease_Up_Months": "Lease-Up Months",
             "Estimated_Property_Size": "Property Size (SqFt)"
         }
@@ -259,7 +253,7 @@ def main():
             format_func=lambda x: metric_options[x]
         )
         
-        # Create histogram with boxplot to undertstand the spread
+        # Creating histogram with boxplot to undertstand the spread
         fig = px.histogram(
             filtered_df,
             x=selected_metric,
@@ -295,7 +289,7 @@ def main():
         fig = go.Figure()
         
         metrics = ['Avg_Effective_Rent', 'Avg_Occupancy', 'Property_Age', 'Avg_Concession']
-        titles = ['Avg. Effective Rent ($)', 'Avg. Occupancy Rate', 'Property Age (Years)', 'Avg. Concession (Days)']
+        titles = ['Avg. Effective Rent ($)', 'Avg. Occupancy Rate', 'Property Age (Years)', 'Avg. Concession ($)']
         
         # Add dropdown menu for different metrics, for more details
         fig.update_layout(
@@ -408,7 +402,7 @@ def main():
         
         st.plotly_chart(fig, use_container_width=True)
     # Add AI Insights Section
-    st.header("🤔Insights Explanation: Want a brief summary. Click the button below!")
+    st.header("Confused! Insights Explanation: Want a brief summary. Click the button below!")
     st.markdown("Get AI-generated 🤖 insights based on the available filtered data displayed on dashboard")
 
     # Creating a button to generate insights based upon current one
@@ -440,6 +434,6 @@ if __name__ == "__main__":
     main()
 #Looks great.
 #Used Streamlit for quick Dashboarding, other can be Tableau from our updated CSVs
-#Avoided inbuilt jupyter dashboard, as it sounds trivial
+#Avoided inbuilt jupyter dashboard, as it sounds trivial and havent used it before. had previous expereince of hosting simple ML model using streamlit and AWS EC2 instance.
 #took bit help of ChatGPT and youtube for making this dashboard -> Though I Got the overall format , structure
 #and layout of my dashbaord, and upgraded my code eventually as and when I wanted specific functionalities
